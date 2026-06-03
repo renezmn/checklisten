@@ -15,8 +15,7 @@ set -euo pipefail
 APP_DIR="${APP_DIR:-/opt/checklisten}"
 BACKUP_DIR="${BACKUP_DIR:-$APP_DIR/backups}"
 COMPOSE_FILE="${COMPOSE_FILE:-$APP_DIR/docker-compose.yml}"
-STATE_VOLUME="${STATE_VOLUME:-checklisten-tool_checklisten-state}"
-ATTACHMENTS_VOLUME="${ATTACHMENTS_VOLUME:-checklisten-tool_checklisten-attachments}"
+API_CONTAINER="${API_CONTAINER:-checklisten-api}"
 DB_CONTAINER="${DB_CONTAINER:-checklisten-postgres}"
 
 FORCE=0
@@ -31,17 +30,21 @@ have docker-compose || have_compose_plugin=1
 
 cd "$APP_DIR"
 
-# ---- Flag-Datei auflösen (Volume muss noch nicht existieren) ----------------
+# ---- Flag-Datei auflösen: aus den /data-Mount des laufenden API-Containers --
+# Das funktioniert egal wie das Volume in compose heißt.
 FLAG_FILE=""
-if docker volume inspect "$STATE_VOLUME" >/dev/null 2>&1; then
-    MOUNT=$(docker volume inspect "$STATE_VOLUME" --format '{{.Mountpoint}}')
-    FLAG_FILE="$MOUNT/update-requested.flag"
+if docker ps --format '{{.Names}}' | grep -q "^${API_CONTAINER}$"; then
+    STATE_MOUNT=$(docker inspect "$API_CONTAINER" --format \
+        '{{ range .Mounts }}{{ if eq .Destination "/data" }}{{ .Source }}{{ end }}{{ end }}')
+    if [[ -n "$STATE_MOUNT" && -d "$STATE_MOUNT" ]]; then
+        FLAG_FILE="$STATE_MOUNT/update-requested.flag"
+    fi
 fi
 
 if [[ $FORCE -eq 0 ]]; then
     if [[ -z "$FLAG_FILE" ]]; then
-        log "Volume $STATE_VOLUME existiert noch nicht – App vermutlich nie gestartet."
-        log "Erst-Setup: ./scripts/update.sh --force"
+        log "API-Container nicht gefunden oder /data-Mount fehlt – App vermutlich nie gestartet."
+        log "Erst-Setup: $0 --force"
         exit 0
     fi
     if [[ ! -f "$FLAG_FILE" ]]; then
@@ -62,15 +65,17 @@ else
     log "Kein laufender ${DB_CONTAINER} – überspringe DB-Backup"
 fi
 
-if docker volume inspect "$ATTACHMENTS_VOLUME" >/dev/null 2>&1; then
+ATTACH_MOUNT=""
+if docker ps --format '{{.Names}}' | grep -q "^${API_CONTAINER}$"; then
+    ATTACH_MOUNT=$(docker inspect "$API_CONTAINER" --format \
+        '{{ range .Mounts }}{{ if eq .Destination "/data/attachments" }}{{ .Source }}{{ end }}{{ end }}')
+fi
+if [[ -n "$ATTACH_MOUNT" && -d "$ATTACH_MOUNT" ]]; then
     log "Backup Anhänge → $BACKUP_DIR/attachments-$TS.tgz"
-    docker run --rm \
-        -v "$ATTACHMENTS_VOLUME":/data:ro \
-        -v "$BACKUP_DIR":/backup \
-        alpine tar -czf "/backup/attachments-$TS.tgz" -C /data . 2>/dev/null || \
-        log "Anhänge-Backup übersprungen (Volume leer?)"
+    tar -czf "$BACKUP_DIR/attachments-$TS.tgz" -C "$ATTACH_MOUNT" . 2>/dev/null \
+        || log "Anhänge-Backup übersprungen (Verzeichnis leer?)"
 else
-    log "Kein Anhänge-Volume vorhanden – überspringe"
+    log "Kein Anhänge-Mount gefunden – überspringe Anhänge-Backup"
 fi
 
 # ---- Quellen aktualisieren --------------------------------------------------
