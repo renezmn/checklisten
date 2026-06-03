@@ -1,0 +1,794 @@
+{
+  "kickoff": {
+    "id": "kickoff",
+    "title": "Kick-Off Meeting",
+    "subtitle": "Upgrade auf NvT-V5",
+    "tag": "Planung",
+    "accent": "brand",
+    "meta": [
+      {
+        "name": "kunde",
+        "label": "Kunde",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "datum",
+        "label": "Datum des Gesprächs",
+        "type": "date",
+        "required": true
+      },
+      {
+        "name": "teilnehmer",
+        "label": "Teilnehmer (intern)",
+        "type": "text"
+      }
+    ],
+    "sections": [
+      {
+        "title": "NovaTime · Systemanforderungen",
+        "items": [
+          {
+            "id": "os_ziel",
+            "type": "multiselect",
+            "label": "Ziel-Betriebssystem",
+            "options": [
+              "Windows 10",
+              "Windows 11",
+              "Windows Server ab 2016"
+            ]
+          },
+          {
+            "id": "upgrade_strategie",
+            "type": "select",
+            "label": "OS-Upgrade In-Place oder neuer Server?",
+            "options": [
+              "In-Place Upgrade",
+              "Neuer Server → Migration → Auftrag"
+            ]
+          },
+          {
+            "id": "sysvor",
+            "type": "info",
+            "label": "Minimale Systemvoraussetzungen",
+            "text": "2 GHz Prozessor · Empfehlung: mind. 2 Kerne · mind. 8 GB RAM (je nach OS)\nNovaTime-DB: Größe von V4 übernehmen\nArchiv-DB: Größe von V4 + 1 MB / Mitarbeiter jährlich über den gesamten Archivzeitraum (Standard 10 Jahre)."
+          }
+        ]
+      },
+      {
+        "title": "Upgrade-Prozess · Planung & Ausführung",
+        "items": [
+          {
+            "id": "datum_server",
+            "type": "date",
+            "label": "Server fertig zum"
+          },
+          {
+            "id": "datum_migr",
+            "type": "datetime-local",
+            "label": "NvT-Migration (Datum/Uhrzeit)"
+          },
+          {
+            "id": "datum_update",
+            "type": "datetime-local",
+            "label": "NvT-Update (Datum/Uhrzeit)"
+          },
+          {
+            "id": "downtime",
+            "type": "info",
+            "label": "Geplante Downtimes",
+            "text": "NovaTime ist ein/mehrere Tage offline. Stationäre Terminals puffern Daten in der Zwischenzeit."
+          },
+          {
+            "id": "ap_it",
+            "type": "text",
+            "label": "Ansprechpartner IT"
+          },
+          {
+            "id": "ap_hr",
+            "type": "text",
+            "label": "Ansprechpartner HR"
+          },
+          {
+            "id": "zugriff",
+            "type": "multiselect",
+            "label": "Zugriff auf den Server",
+            "options": [
+              "Dauerzugang PCVisit mit eigenem Admin-User",
+              "Fernwartung mit IT-Abteilung über PCVisit",
+              "TeamViewer (muss beim Kunden lizensiert sein)",
+              "Andere"
+            ]
+          },
+          {
+            "id": "zugriff_andere",
+            "type": "textarea",
+            "label": "Andere Zugangsart – Details",
+            "optional": true
+          }
+        ]
+      },
+      {
+        "title": "To-Dos im Vorfeld",
+        "items": [
+          {
+            "id": "todo_user_rechte",
+            "type": "check",
+            "text": "Benutzer und deren Rechte überprüfen",
+            "note": "Kann auch nach dem Update erfolgen."
+          },
+          {
+            "id": "todo_mehrplatz",
+            "type": "check",
+            "text": "Mehrplatzfähigkeit ausreichend lizensiert?",
+            "note": "Je nach Berechtigung können Logins in NovaTime-Web auch einen Client-Platz belegen."
+          },
+          {
+            "id": "web_erreichbar",
+            "type": "select",
+            "label": "NovaTime-Web erreichbar",
+            "options": [
+              "Nur im Intranet",
+              "Von außerhalb erreichbar"
+            ]
+          },
+          {
+            "id": "web_domain",
+            "type": "text",
+            "label": "Domain-Name mit Routing-Port (bei Migration)"
+          },
+          {
+            "id": "ssl",
+            "type": "select",
+            "label": "SSL-Zertifikat bereitgestellt durch",
+            "options": [
+              "Kunde",
+              "dP elektronik"
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Nach dem Update",
+        "items": [
+          {
+            "id": "fw",
+            "type": "info",
+            "label": "Firewall Inbound-Regeln",
+            "text": "NovaTime-Mails: 25 / 587\nClient-Kommunikation: 11995\nHardware-Terminals: 8000\nNovaTime-Web: 9000"
+          },
+          {
+            "id": "av",
+            "type": "info",
+            "label": "Virenscanner-Ausnahmen",
+            "text": "NvT-Ordner inkl. Unterordner sowie NvT-Dienste von Novatime exkludieren."
+          },
+          {
+            "id": "client_admin",
+            "type": "info",
+            "label": "NvT-Admin-User",
+            "text": "Novatime.exe (Client)"
+          },
+          {
+            "id": "client_sb",
+            "type": "select",
+            "label": "Sachbearbeiter-Clients",
+            "options": [
+              "Exe",
+              "Web",
+              "Beides"
+            ]
+          },
+          {
+            "id": "client_ma",
+            "type": "info",
+            "label": "Mitarbeiter",
+            "text": "Web"
+          },
+          {
+            "id": "einweisung_datum",
+            "type": "date",
+            "label": "Einweisung mit HR (Datum)"
+          }
+        ]
+      }
+    ]
+  },
+  "rauten": {
+    "id": "rauten",
+    "title": "Rauten-Update Novatime",
+    "subtitle": "Patch-Update innerhalb V4 oder V5",
+    "tag": "Patch",
+    "accent": "brand",
+    "meta": [
+      {
+        "name": "kunde",
+        "label": "Kunde",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "datum",
+        "label": "Datum/Uhrzeit",
+        "type": "datetime-local",
+        "required": true
+      },
+      {
+        "name": "supporter",
+        "label": "Supporter",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "vonVersion",
+        "label": "Von Version",
+        "type": "text",
+        "placeholder": "z. B. V4.x.0x #xx"
+      },
+      {
+        "name": "aufVersion",
+        "label": "Auf Version",
+        "type": "text",
+        "placeholder": "z. B. V5.0.01 #xx"
+      }
+    ],
+    "sections": [
+      {
+        "title": "DB-Vorbereitung auf dem Kundenserver",
+        "items": [
+          {
+            "id": "p1",
+            "type": "check",
+            "text": "NovaTime öffnen, Hilfe → Info"
+          },
+          {
+            "id": "p2",
+            "type": "check",
+            "text": "Userverwaltung Basisdaten: Kalender auf „read\" bei allen Usern setzen, sodass keiner den Kalender ändern kann"
+          },
+          {
+            "id": "p3",
+            "type": "check",
+            "text": "F12 → Allgemein 1: Rückrechendatum auf 03.01.yyyy gesetzt"
+          },
+          {
+            "id": "p4",
+            "type": "check",
+            "text": "F12 → Allgemein 2 · Urlaubskomfortmodul: bei „Urlaubsverfall\" das Häkchen setzen"
+          },
+          {
+            "id": "p5",
+            "type": "check",
+            "text": "F12 → Versions-Info"
+          },
+          {
+            "id": "p6",
+            "type": "check",
+            "text": "Alle NovaTime-Programme beenden"
+          },
+          {
+            "id": "p7",
+            "type": "check",
+            "text": "Dienste beenden und deinstallieren: nvtcom, nzeitauf, perimex, zdb",
+            "note": "DienstStop.bat im Admin-Fenster · Datei → Dienst deinstallieren · in „Dienste\" prüfen, ob alle NovaTime-Dienste verschwunden sind. Workflow beenden. Bei Workflow, Browser-Terminal oder Handy-App sicherstellen, dass kein Zugriff erfolgt (Task Manager prüfen!)."
+          },
+          {
+            "id": "p8",
+            "type": "check",
+            "text": "Workflow in IIS beenden"
+          },
+          {
+            "id": "p9",
+            "type": "check",
+            "text": "Komplettsicherung von C:\\NovaTime",
+            "note": "Kein Backup, kein Mitleid!"
+          }
+        ]
+      },
+      {
+        "title": "Update",
+        "items": [
+          {
+            "id": "u1",
+            "type": "check",
+            "text": "Update-CD mit der neuen Raute auf den Kundenserver übertragen und SETUP.EXE ausführen",
+            "note": "Installation: Grundpaket & alle Optionen auswählen. Installationspfad beachten."
+          },
+          {
+            "id": "u2",
+            "type": "check",
+            "text": "F12 → Grundeinstellungen: folgende Parameter überprüfen und anpassen"
+          },
+          {
+            "id": "u3",
+            "type": "check",
+            "text": "Dienste als Admin installieren und starten"
+          },
+          {
+            "id": "u4",
+            "type": "check",
+            "text": "Workflow in IIS starten"
+          },
+          {
+            "id": "u5",
+            "type": "check",
+            "text": "Systemtest: NovaTime-Software und Info"
+          },
+          {
+            "id": "u6",
+            "type": "check",
+            "text": "F12 → Version-Info prüfen"
+          },
+          {
+            "id": "u7",
+            "type": "check",
+            "text": "Automatische Datensicherung prüfen (nicht auf Netzlaufwerken)",
+            "note": "Tägliche Sicherung in sieben unterschiedliche Ordner. Falls nicht, anpassen und Pfade aktualisieren. Kunden informieren. Weitere Kopien an anderen Speicherorten muss der Kunde selbst anlegen. Die NovaTime-Sicherungen bleiben auf dem Server, auf dem auch NovaTime läuft."
+          },
+          {
+            "id": "u8",
+            "type": "check",
+            "text": "Terminals testen (V5-Connect / V4-TermShow)"
+          },
+          {
+            "id": "u9",
+            "type": "check",
+            "text": "Lampentableau testen"
+          },
+          {
+            "id": "u10",
+            "type": "check",
+            "text": "Browser-/Bildschirmterminal testen"
+          },
+          {
+            "id": "u11",
+            "type": "check",
+            "text": "Syslog auf Fehler überprüfen"
+          },
+          {
+            "id": "u12",
+            "type": "check",
+            "text": "Ggf. Desktop-Verknüpfungen löschen",
+            "note": "z. B. ungenutzte Optionen wie Lampentableau, Nv_Connect, …"
+          },
+          {
+            "id": "u13",
+            "type": "select",
+            "label": "Clients-Update durch",
+            "options": [
+              "dP elektronik",
+              "Kunden",
+              "Geteilt"
+            ]
+          },
+          {
+            "id": "u14",
+            "type": "check",
+            "text": "Lokale Installation auf Client-PC",
+            "note": "Anleitung auf Server-Desktop speichern und Kunden mitteilen."
+          },
+          {
+            "id": "u15",
+            "type": "check",
+            "text": "Client-prg auf Netzlaufwerk aktualisieren",
+            "note": "Computerverwaltung öffnen (Dieser PC → Verwalten) · Freigegebene Ordner → Sitzungen und geöffnete Dateien prüfen · Dateien aus prg in Client-prg-Verzeichnis kopieren · Verknüpfungen und hinterlegte Ausführpfade kontrollieren und ggf. erneuern."
+          },
+          {
+            "id": "u16",
+            "type": "check",
+            "text": "Auf User-PCs oder freigegebenem Laufwerk SETUP.exe ausführen",
+            "note": "Nur NovaTime + ggf. Optionen wie Lampentableau. Auf dem lokalen Client-PC müssen zusätzlich die Systemdateien installiert sein. Bei neuem PC: lokal Systemdateien installieren! Evtl. User-prg-Ordner aktualisieren und auf Client-PCs kopieren (korrekten Installationspfad beachten)."
+          }
+        ]
+      },
+      {
+        "title": "Dokumentation & Ablage",
+        "items": [
+          {
+            "id": "d1",
+            "type": "check",
+            "text": "nvdaten.dba herunterladen und im Kundenverzeichnis ablegen",
+            "note": "V:\\Kundendaten\\Kunde\\aktuelle nvdaten.dba – wichtig für Preiskalkulator und Lizenzinfos."
+          },
+          {
+            "id": "d2",
+            "type": "check",
+            "text": "Neue Lizenzinfo und Version im Teamleader beim Kunden hinterlegen",
+            "note": "Unter: 1. Firmeninformationen (Versionsstand NovaTime), 2. Lizenzinformationen (Kopie der Lizenzinfo)."
+          },
+          {
+            "id": "d3",
+            "type": "check",
+            "text": "Diese Checkliste im Kundenverzeichnis unter Dokumentation ablegen",
+            "note": "V:\\Kundendaten\\Kunde\\Dokus"
+          }
+        ]
+      }
+    ]
+  },
+  "update": {
+    "id": "update",
+    "title": "Checkliste Update NovaTime",
+    "subtitle": "Vollständiges Versions-Update",
+    "tag": "Vollupdate",
+    "accent": "brand",
+    "meta": [
+      {
+        "name": "kunde",
+        "label": "Kunde",
+        "type": "text",
+        "required": true
+      },
+      {
+        "name": "datum",
+        "label": "Datum/Uhrzeit",
+        "type": "datetime-local",
+        "required": true
+      },
+      {
+        "name": "supporter",
+        "label": "Supporter",
+        "type": "text"
+      },
+      {
+        "name": "vonVersion",
+        "label": "Von Version",
+        "type": "text",
+        "placeholder": "z. B. 4.X.0X #00X"
+      },
+      {
+        "name": "aufVersion",
+        "label": "Auf Version",
+        "type": "text",
+        "placeholder": "z. B. 4.7.6 #011"
+      }
+    ],
+    "sections": [
+      {
+        "title": "Vorprüfung",
+        "items": [
+          {
+            "id": "v1",
+            "type": "check",
+            "text": "Betriebssystem prüfen",
+            "note": "Ab Version 4.7.02 läuft NovaTime nicht mehr unter Win XP/Vista oder Windows Server 2003."
+          },
+          {
+            "id": "v2",
+            "type": "check",
+            "text": "Admin-Zugriffsrechte auf dem Server (Dienste beenden/starten möglich)"
+          },
+          {
+            "id": "v3",
+            "type": "check",
+            "text": "Optional Migration: Checkliste Servermigration prüfen"
+          },
+          {
+            "id": "v4",
+            "type": "check",
+            "text": "Datenübertragung starten"
+          }
+        ]
+      },
+      {
+        "title": "Bestandsaufnahme & Userverwaltung",
+        "items": [
+          {
+            "id": "b1",
+            "type": "check",
+            "text": "NovaTime → Hilfe → Info"
+          },
+          {
+            "id": "b2",
+            "type": "check",
+            "text": "Userverwaltung: Kalender auf „read\" bei allen Usern setzen"
+          },
+          {
+            "id": "b3",
+            "type": "check",
+            "text": "Userverwaltung: „Löschen erlaubt im Internet?\" kontrollieren & dokumentieren"
+          },
+          {
+            "id": "b4",
+            "type": "check",
+            "text": "Userverwaltung: „Passwort sichtbar\" ausschalten",
+            "note": "Personalsatz → F12 → „Passwort lesbar\" Haken raus."
+          },
+          {
+            "id": "b5",
+            "type": "check",
+            "text": "F12: Protokollierung aktiv?",
+            "note": "Alle Reiter durchklicken. F12 → Anzahl Vormonate für Protokollierung (0 = keine). Default 3 Monate."
+          },
+          {
+            "id": "b6",
+            "type": "check",
+            "text": "F12: Rückrechendatum gesetzt"
+          },
+          {
+            "id": "b7",
+            "type": "check",
+            "text": "F12: Urlaubskomfortmodul → „Urlaubsverfall\" Häkchen setzen"
+          },
+          {
+            "id": "b8",
+            "type": "check",
+            "text": "F12: Leser-Einstellungen mit Screenshots dokumentieren",
+            "attach": "required"
+          },
+          {
+            "id": "b9",
+            "type": "check",
+            "text": "F12: „DIN-Nr-Prüfung im Personalsatz\" aktiv?"
+          },
+          {
+            "id": "b10",
+            "type": "check",
+            "text": "F12: Version-Info prüfen"
+          },
+          {
+            "id": "b11",
+            "type": "check",
+            "text": "Workflow / Antragswesen testen",
+            "note": "http://localhost/cgi-bin/htm_work.cgi aufrufen."
+          },
+          {
+            "id": "b12",
+            "type": "check",
+            "text": "Lampentableau testen"
+          },
+          {
+            "id": "b13",
+            "type": "check",
+            "text": "Browser-/Bildschirmterminal testen"
+          },
+          {
+            "id": "b14",
+            "type": "check",
+            "text": "Terminals online (TermShow)"
+          },
+          {
+            "id": "b15",
+            "type": "check",
+            "text": "Prüfung ALLER lizensierter Optionen auf Funktionalität"
+          }
+        ]
+      },
+      {
+        "title": "Dienste stoppen & Backup",
+        "items": [
+          {
+            "id": "d1",
+            "type": "check",
+            "text": "Dienste beenden und deinstallieren: nvtcom, nzeitauf, perimex, zdb",
+            "note": "DienstStop.bat → Admin-Fenster → Datei → Dienst deinstallieren · in Dienste prüfen, ob alle NvT-Dienste verschwunden sind. Workflow beenden. Ggf. Port in zdbserv.ini vorübergehend ändern, wenn der ZDB-Server getestet werden muss und sonst Mitarbeiter zufällig Buchungen tätigen könnten."
+          },
+          {
+            "id": "d2",
+            "type": "check",
+            "text": "Backup-ZIP des gesamten Verzeichnisses",
+            "note": "Sicherung aller NovaTime-Standardverzeichnisse (PRG / INTERNET / DATEN)."
+          },
+          {
+            "id": "d3",
+            "type": "check",
+            "text": "Installationsverzeichnis prüfen",
+            "note": "Installationen unter C:\\Programme, C:\\Programme (x86) etc. auf C:\\Novatime umziehen."
+          }
+        ]
+      },
+      {
+        "title": "Update durchführen",
+        "items": [
+          {
+            "id": "u1",
+            "type": "check",
+            "text": "Update starten",
+            "note": "Lizenz unter Kundendaten hinterlegt · Installationspfad beachten · Installation nach vorhandenen Optionen wählen (Internet, Smartphone, Tools, weitere Optionen nach Kundenlizenz) · Neustart des Servers empfohlen. Bei DEMO Update-CD für neuere #-Version: ZDB-Server nach Lizenz-Update kurz starten."
+          },
+          {
+            "id": "u2",
+            "type": "check",
+            "text": "COM1 für zukünftige Datafox-Terminals anlegen (nicht mehr comd)",
+            "note": "Ggf. mehrere COM-Dienste · COM-Generator (als Admin) ausführen · generierte Dateien in COM-Ordner verschieben/aktualisieren · alte .dll-Dateien/Ordner in den COM-Ordnern mit denen aus dem prg-Ordner ersetzen."
+          }
+        ]
+      },
+      {
+        "title": "Nachprüfung",
+        "items": [
+          {
+            "id": "n1",
+            "type": "check",
+            "text": "NovaTime → Hilfe → Info"
+          },
+          {
+            "id": "n2",
+            "type": "check",
+            "text": "Automatische Datensicherung prüfen (nicht auf Netzlaufwerke)"
+          },
+          {
+            "id": "n3",
+            "type": "check",
+            "text": "Userverwaltung: „Löschen erlaubt im Internet?\" kontrollieren",
+            "note": "Häkchen fälschlicherweise gesetzt?"
+          },
+          {
+            "id": "n4",
+            "type": "check",
+            "text": "F12: Archiv angelegt / in F12 SQLite-DB erstellen",
+            "note": "Abfragelisten erstellen = neuer Auftrag."
+          },
+          {
+            "id": "n5",
+            "type": "check",
+            "text": "F12: Urlaubs-Komfortmodul → „Urlaubsverfall\" Häkchen setzen"
+          },
+          {
+            "id": "n6",
+            "type": "check",
+            "text": "F12: Rückrechendatum kontrollieren"
+          },
+          {
+            "id": "n7",
+            "type": "check",
+            "text": "F12: Leseverfahren – Screenshots gegen Vorher-Screenshots prüfen",
+            "attach": "optional"
+          },
+          {
+            "id": "n8",
+            "type": "check",
+            "text": "F12: „DIN-Nr-Prüfung im Personalsatz\" aktiv?"
+          },
+          {
+            "id": "n9",
+            "type": "check",
+            "text": "F12: Version-Info prüfen"
+          },
+          {
+            "id": "n10",
+            "type": "check",
+            "text": "Dienste wieder installieren und starten (als Admin)"
+          },
+          {
+            "id": "n11",
+            "type": "check",
+            "text": "Terminals (TermShow) testen"
+          },
+          {
+            "id": "n12",
+            "type": "check",
+            "text": "Lampentableau testen"
+          },
+          {
+            "id": "n13",
+            "type": "check",
+            "text": "Browser-/Bildschirmterminal testen"
+          },
+          {
+            "id": "n14",
+            "type": "check",
+            "text": "NZeitAuf Ausgabeverzeichnis prüfen",
+            "note": "Funktioniert nicht in C:\\Ausgabedatei – es muss C:\\Ordner\\Ausgabedatei hinterlegt sein."
+          },
+          {
+            "id": "n15",
+            "type": "check",
+            "text": "Workflow + Verzeichnisse überprüfen",
+            "note": "Speziell bei Apache-Webservern CGI- und HTML-Verzeichnisse prüfen. IIS sollte funktionieren."
+          },
+          {
+            "id": "n16",
+            "type": "check",
+            "text": "Prüfung ALLER lizensierter Optionen auf Funktionalität"
+          },
+          {
+            "id": "n17",
+            "type": "check",
+            "text": "Syslog auf Fehler überprüfen"
+          }
+        ]
+      },
+      {
+        "title": "Clients, Sicherheit & Abschluss",
+        "items": [
+          {
+            "id": "c0",
+            "type": "check",
+            "text": "Update-Dateien in Install-Ordner verschieben",
+            "note": "z. B. C:\\Novatime\\install\\NvT_Update_4_7_02"
+          },
+          {
+            "id": "c1",
+            "type": "check",
+            "text": "Ggf. Desktop-Verknüpfungen löschen"
+          },
+          {
+            "id": "c2",
+            "type": "check",
+            "text": "Virenscanner und Firewall: NovaTime-Verzeichnis und NvT-Dienste ausschließen",
+            "note": "Update auf 4.7.04 ändert den Namen des ZDB-Dienstes. Ggf. Port anpassen."
+          },
+          {
+            "id": "c3",
+            "type": "select",
+            "label": "Clients-Update durch",
+            "options": [
+              "dP elektronik",
+              "Kunden",
+              "Geteilt"
+            ]
+          },
+          {
+            "id": "c4",
+            "type": "check",
+            "text": "Lokale Installation auf Client-PCs"
+          },
+          {
+            "id": "c5",
+            "type": "check",
+            "text": "Client-prg auf Netzlaufwerk aktualisieren",
+            "note": "Computerverwaltung → Freigegebene Ordner → Sitzungen prüfen. Dateien aus prg ins Client-prg-Verzeichnis kopieren. Verknüpfungen und Ausführpfade prüfen."
+          },
+          {
+            "id": "c6",
+            "type": "check",
+            "text": "Auf User-PCs oder freigegebenem Laufwerk SETUP.exe ausführen",
+            "note": "Nur NovaTime + ggf. Optionen. Auf neuen PCs lokal Systemdateien installieren. User-prg-Ordner ggf. aktualisieren."
+          },
+          {
+            "id": "c7",
+            "type": "check",
+            "text": "Neue Funktionen dem Kunden erklären / Release-Infos zusenden",
+            "note": "Ticket im Teamleader schließen."
+          },
+          {
+            "id": "c8",
+            "type": "check",
+            "text": "Kunden ADV / TOM zuschicken, sofern noch nicht erfolgt"
+          },
+          {
+            "id": "c9",
+            "type": "check",
+            "text": "Neue Lizenzinfo und Version im Teamleader hinterlegen",
+            "note": "Unter Firmeninformationen und Lizenzinformationen."
+          },
+          {
+            "id": "c10",
+            "type": "check",
+            "text": "nvdaten.dba im Kundenverzeichnis ablegen",
+            "note": "Für Preiskalkulator und Lizenzinfos."
+          },
+          {
+            "id": "c11",
+            "type": "check",
+            "text": "Diese Checkliste im Kundenverzeichnis unter Dokumentation ablegen",
+            "note": "V:\\Kundendaten\\Kunde\\Dokus"
+          }
+        ]
+      },
+      {
+        "title": "Notizen, Hinweise & mögliche Fehler",
+        "items": [
+          {
+            "id": "notizen",
+            "type": "textarea",
+            "label": "Eigene Notizen zum Einsatz"
+          },
+          {
+            "id": "hinweis_ssl",
+            "type": "info",
+            "label": "Hinweis SSL & Installationspfade",
+            "text": "Da NovaTime Personaldaten verarbeitet, empfehlen wir eine verschlüsselte SSL-Übertragung des Web-Service NovaTime Workflow. Dazu wird ein SSL-Zertifikat im IIS-Webserver installiert. Dadurch verändern sich auch die Links zur NovaTime.\n\ndP elektronik hat seine Installationspfade geändert: alle NovaTime-Dateien werden nur noch im NovaTime-Verzeichnis installiert. Auch das lokale Backup wandert dorthin. Bitte prüfen, ob Drittsysteme auf C:\\Nvtsich\\* zugreifen. Änderungen erst nach Freigabe des Kunden ausführen – funktional nicht zwingend, sorgt aber für mehr Übersicht."
+          },
+          {
+            "id": "hinweis_dll",
+            "type": "info",
+            "label": "Möglicher Fehler: XX.dll fehlt",
+            "text": "1. prg-Ordner in prg_old umbenennen und Update erneut durchführen, sodass ein neues prg-Verzeichnis entsteht.\n2. koge-def.ini, lg-def.ini, lg-def.lst, nzeitauf.dba, perimex.dba, zdbserv.ini aus prg_old in den neuen prg-Ordner kopieren."
+          }
+        ]
+      }
+    ]
+  }
+}

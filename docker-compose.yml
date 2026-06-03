@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: checklisten-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: checklisten
+      POSTGRES_USER: checklisten
+      POSTGRES_PASSWORD: checklisten
+    ports:
+      - "5434:5432"
+    volumes:
+      - checklisten-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U checklisten -d checklisten"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    profiles: ["prod"]   # leave inactive in dev; enable with `--profile prod`
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: checklisten-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_URLS: http://0.0.0.0:8080
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=checklisten;Username=checklisten;Password=checklisten
+      Frontend__PathRelativeToContentRoot: ./wwwroot
+      Attachments__Path: /data/attachments
+      Seed__AdminUsername: admin
+      Seed__AdminPassword: ${ADMIN_PASSWORD:-admin}
+      APP_VERSION: ${APP_VERSION:-dev}
+      Update__VersionUrl: ${UPDATE_VERSION_URL:-}
+      Update__FlagFile: /data/update-requested.flag
+    ports:
+      - "8080:8080"
+    volumes:
+      - checklisten-attachments:/data/attachments
+      - checklisten-state:/data
+
+volumes:
+  checklisten-postgres-data:
+  checklisten-attachments:
+  checklisten-state:

@@ -1,0 +1,28 @@
+# Build output
+**/bin/
+**/obj/
+
+# Runtime data (anchored: only the root-level data folder, not backend Data/ sources)
+/data/
+/backups/
+
+# Environment / secrets
+.env
+.env.local
+*.local
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (if any tool ever uses it)
+node_modules/
+
+# Logs
+*.log
