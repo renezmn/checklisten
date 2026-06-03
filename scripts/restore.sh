@@ -27,7 +27,8 @@ ATT_BACKUP="${2:-}"
 
 DB_CONTAINER="${DB_CONTAINER:-checklisten-postgres}"
 API_CONTAINER="${API_CONTAINER:-checklisten-api}"
-ATTACHMENTS_VOLUME="${ATTACHMENTS_VOLUME:-checklisten-tool_checklisten-attachments}"
+APP_DIR="${APP_DIR:-/opt/checklisten}"
+COMPOSE_FILE="${COMPOSE_FILE:-$APP_DIR/docker-compose.yml}"
 
 [[ -f "$DB_BACKUP" ]] || { echo "FEHLER: $DB_BACKUP nicht gefunden" >&2; exit 1; }
 if [[ -n "$ATT_BACKUP" && ! -f "$ATT_BACKUP" ]]; then
@@ -52,14 +53,19 @@ gunzip -c "$DB_BACKUP" | docker exec -i "$DB_CONTAINER" psql -U checklisten -d c
 
 if [[ -n "$ATT_BACKUP" ]]; then
     echo "==> Anhänge wiederherstellen aus $ATT_BACKUP"
-    # Volume leeren, dann Tar entpacken
-    docker run --rm -v "$ATTACHMENTS_VOLUME":/data alpine sh -c 'rm -rf /data/*'
-    docker run --rm -v "$ATTACHMENTS_VOLUME":/data -v "$(realpath "$ATT_BACKUP")":/backup.tgz:ro \
-        alpine tar -xzf /backup.tgz -C /data
+    # Pfad zum Anhänge-Volume holen – API-Container ist gestoppt, daher zurück über docker inspect
+    ATTACH_MOUNT=$(docker inspect "$API_CONTAINER" --format \
+        '{{ range .Mounts }}{{ if eq .Destination "/data/attachments" }}{{ .Source }}{{ end }}{{ end }}')
+    if [[ -z "$ATTACH_MOUNT" ]]; then
+        echo "FEHLER: Konnte Anhänge-Mount nicht ermitteln (API-Container nicht vorhanden?)" >&2
+        exit 1
+    fi
+    rm -rf "$ATTACH_MOUNT"/*
+    tar -xzf "$ATT_BACKUP" -C "$ATTACH_MOUNT"
 fi
 
 echo "==> API wieder starten"
 docker start "$API_CONTAINER" 2>/dev/null || \
-    docker compose --profile prod -f /opt/checklisten/docker-compose.yml up -d api
+    docker compose --profile prod -f "$COMPOSE_FILE" up -d api
 
 echo "Restore abgeschlossen. Bitte einmal /api/health prüfen."

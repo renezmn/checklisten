@@ -17,7 +17,7 @@ APP_DIR="${APP_DIR:-/opt/checklisten}"
 BACKUP_DIR="${BACKUP_DIR:-$APP_DIR/backups}"
 KEEP="${BACKUP_KEEP:-30}"          # Anzahl Backups, die behalten werden
 DB_CONTAINER="${DB_CONTAINER:-checklisten-postgres}"
-ATTACHMENTS_VOLUME="${ATTACHMENTS_VOLUME:-checklisten-tool_checklisten-attachments}"
+API_CONTAINER="${API_CONTAINER:-checklisten-api}"
 
 QUIET=0
 if [[ "${1:-}" == "--quiet" ]]; then QUIET=1; fi
@@ -42,13 +42,20 @@ if [[ $(stat -c%s "$DB_FILE" 2>/dev/null || stat -f%z "$DB_FILE") -lt 200 ]]; th
 fi
 
 # ---- Anhänge -----------------------------------------------------------------
-log "Sichere Anhänge → $ATT_FILE"
-if ! docker run --rm \
-        -v "$ATTACHMENTS_VOLUME":/data:ro \
-        -v "$BACKUP_DIR":/backup \
-        alpine tar -czf "/backup/attachments-$TS.tgz" -C /data . 2>/dev/null; then
-    echo "WARNUNG: Anhänge-Backup fehlgeschlagen (Volume leer?)" >&2
-    # Kein hartes Exit – ohne hochgeladene Bilder ist das Volume manchmal leer
+# Pfad zum Volume aus dem laufenden API-Container ableiten (unabhängig vom Projektnamen)
+ATTACH_MOUNT=""
+if docker ps --format '{{.Names}}' | grep -q "^${API_CONTAINER}$"; then
+    ATTACH_MOUNT=$(docker inspect "$API_CONTAINER" --format \
+        '{{ range .Mounts }}{{ if eq .Destination "/data/attachments" }}{{ .Source }}{{ end }}{{ end }}')
+fi
+
+if [[ -n "$ATTACH_MOUNT" && -d "$ATTACH_MOUNT" ]]; then
+    log "Sichere Anhänge → $ATT_FILE"
+    if ! tar -czf "$ATT_FILE" -C "$ATTACH_MOUNT" . 2>/dev/null; then
+        echo "WARNUNG: Anhänge-Backup fehlgeschlagen (Verzeichnis leer?)" >&2
+    fi
+else
+    log "Kein Anhänge-Mount gefunden – überspringe (API-Container nicht gestartet?)"
 fi
 
 # ---- Rotation ----------------------------------------------------------------
