@@ -1,0 +1,24 @@
+# Unix line endings für Shell-Skripte – Pflicht, sonst killt CRLF die Bash-Shebang
+*.sh         text eol=lf
+scripts/*    text eol=lf
+
+# Auch für Docker und systemd-relevantes
+Dockerfile   text eol=lf
+*.yml        text eol=lf
+*.yaml       text eol=lf
+*.service    text eol=lf
+*.timer      text eol=lf
+
+# Source bleibt frei
+*.cs         text
+*.json       text
+*.md         text
+*.html       text
+*.css        text
+*.js         text
+
+# Binaries
+*.png        binary
+*.jpg        binary
+*.jpeg       binary
+*.pdf        binary
