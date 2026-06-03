@@ -235,35 +235,43 @@ journalctl -u caddy -n 30   # auf "certificate obtained" prüfen
 ## 9. Backup-Cron
 
 Das `update.sh` macht vor jedem Update ein Backup. Zusätzlich ein nächtliches
-Backup auch ohne Update – das ist Pflicht für ein Produktionssystem:
+Backup auch ohne Update – das ist Pflicht für ein Produktionssystem.
 
-`/etc/cron.d/checklisten-backup`:
-
-```cron
-# Jede Nacht um 02:30 ein Backup
-30 2 * * * root /opt/checklisten/scripts/backup.sh >> /var/log/checklisten-backup.log 2>&1
-```
-
-`scripts/backup.sh` (existiert noch nicht – bitte anlegen):
+Die Skripte liegen schon im Repo unter `scripts/backup.sh` und
+`scripts/restore.sh`.
 
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-APP_DIR=/opt/checklisten
-BACKUP_DIR=$APP_DIR/backups
-TS=$(date +%Y%m%d-%H%M%S)
-mkdir -p "$BACKUP_DIR"
-docker exec checklisten-postgres pg_dump -U checklisten checklisten > "$BACKUP_DIR/db-$TS.sql"
-docker run --rm -v checklisten-tool_checklisten-attachments:/data:ro \
-  -v "$BACKUP_DIR":/backup alpine tar -czf "/backup/attachments-$TS.tgz" -C /data .
-ls -1t "$BACKUP_DIR"/db-*.sql 2>/dev/null         | tail -n +30 | xargs -r rm -f
-ls -1t "$BACKUP_DIR"/attachments-*.tgz 2>/dev/null | tail -n +30 | xargs -r rm -f
+chmod +x /opt/checklisten/scripts/backup.sh /opt/checklisten/scripts/restore.sh
 ```
 
-`chmod +x scripts/backup.sh`.
+`/etc/cron.d/checklisten-backup` anlegen:
 
-Bonus: Backups regelmäßig **vom Host wegkopieren** (rsync auf NAS oder
-ähnliches). Local-Backup hilft nicht, wenn die VM kaputt geht.
+```cron
+# Jede Nacht um 02:30 ein Backup, Logs in /var/log/checklisten-backup.log
+30 2 * * * root /opt/checklisten/scripts/backup.sh --quiet >> /var/log/checklisten-backup.log 2>&1
+```
+
+Manuell testen:
+
+```bash
+/opt/checklisten/scripts/backup.sh
+ls -lah /opt/checklisten/backups/
+```
+
+Restore (im Notfall):
+
+```bash
+# DB + Anhänge eines bestimmten Backup-Sets wiederherstellen
+/opt/checklisten/scripts/restore.sh \
+    /opt/checklisten/backups/db-20260603-023000.sql.gz \
+    /opt/checklisten/backups/attachments-20260603-023000.tgz
+```
+
+### Offsite-Kopie (sehr empfohlen)
+
+Local-Backup hilft nicht, wenn die VM kaputt geht. In `backup.sh` ist ein
+auskommentierter Block für `rsync` zu einem NAS / zweiten Server. Pfad anpassen
+und SSH-Key auf der Ziel-Maschine hinterlegen, fertig.
 
 ---
 
