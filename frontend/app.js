@@ -173,12 +173,12 @@
   // ----- Routing
   window.addEventListener('hashchange', parseRoute);
   function parseRoute() {
-    const user = state.user;
+    const keep = { user: state.user, appVersion: state.appVersion };
     const hash = location.hash.replace(/^#\/?/, '');
     if (!hash || hash === 'start') {
-      state = { route: 'start', user };
+      state = { route: 'start', ...keep };
     } else if (hash === 'saved') {
-      state = { route: 'saved', user };
+      state = { route: 'saved', ...keep };
     } else if (hash.startsWith('new/')) {
       const type = hash.slice(4);
       if (CHECKLISTS[type]) {
@@ -193,19 +193,19 @@
         })();
         return;
       }
-      state = { route: 'start', user };
+      state = { route: 'start', ...keep };
     } else if (hash.startsWith('sess/')) {
-      state = { route: 'sess', sessionId: hash.slice(5), user };
+      state = { route: 'sess', sessionId: hash.slice(5), ...keep };
     } else if (hash === 'editor') {
-      state = { route: 'editor', user };
+      state = { route: 'editor', ...keep };
     } else if (hash.startsWith('editor/')) {
       const type = hash.slice(7);
-      if (CHECKLISTS[type]) state = { route: 'editTpl', type, user };
-      else state = { route: 'editor', user };
+      if (CHECKLISTS[type]) state = { route: 'editTpl', type, ...keep };
+      else state = { route: 'editor', ...keep };
     } else if (hash === 'users') {
-      state = { route: 'users', user };
+      state = { route: 'users', ...keep };
     } else {
-      state = { route: 'start', user };
+      state = { route: 'start', ...keep };
     }
     render();
   }
@@ -215,6 +215,9 @@
     view.innerHTML = '';
     crumbsEl.innerHTML = '';
     topActions.innerHTML = '';
+    // Topbar-Version aktualisieren (kommt aus boot)
+    const vt = document.getElementById('versionTag');
+    if (vt) vt.textContent = state.appVersion ? 'v' + state.appVersion : '';
 
     // Login screen takes precedence over routes
     if (!state.user) return renderLogin();
@@ -273,6 +276,7 @@
         <div class="login-error" hidden></div>
         <button type="submit" class="btn primary login-submit">Anmelden</button>
       </form>
+      <div class="login-footer">${state.appVersion ? 'Version ' + escapeHtml(state.appVersion) : ''}</div>
     `;
     view.appendChild(card);
     const form = card.querySelector('form');
@@ -1734,6 +1738,9 @@
   // ----- Boot
   initTheme();
   (async function boot() {
+    // Version sofort holen (klein, kein Login nötig) – für Topbar/Login-Anzeige
+    try { state.appVersion = (await API.get('/api/version'))?.version || null; }
+    catch { state.appVersion = null; }
     try {
       state.user = await API.auth.me();
       if (state.user) {
