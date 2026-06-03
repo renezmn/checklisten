@@ -24,7 +24,7 @@ git commit -m "Initial: Checklisten-App"
 
 # Auf github.com ein privates Repo anlegen (z. B. dp-elektronik/checklisten),
 # DANN das Remote hinzufügen:
-git remote add origin git@github.com:dp-elektronik/checklisten.git
+git remote add origin git@github.com:renezmn/checklisten.git
 git push -u origin main
 ```
 
@@ -108,7 +108,7 @@ ssh -T git@github.com
 ## 5. Repo klonen + ENV setzen
 
 ```bash
-git clone git@github.com:dp-elektronik/checklisten.git /opt/checklisten
+git clone git@github.com:renezmn/checklisten.git /opt/checklisten
 cd /opt/checklisten
 
 # .env aus Vorlage erstellen
@@ -121,15 +121,17 @@ In der `.env` mindestens setzen:
 ```env
 ADMIN_PASSWORD=einZufaelligesPasswort     # openssl rand -base64 18
 APP_VERSION=0.1.0                          # was VERSION-Datei sagt
-UPDATE_VERSION_URL=https://raw.githubusercontent.com/dp-elektronik/checklisten/main/VERSION
+UPDATE_VERSION_URL=https://raw.githubusercontent.com/renezmn/checklisten/main/VERSION
 ```
 
 ⚠️ Privates Repo? Dann braucht die Raw-URL einen Token (GitHub →
 Settings → Personal Access Tokens, nur `repo:read`):
 
 ```env
-UPDATE_VERSION_URL=https://ghp_xxxxxxxxxxxxxxxxxxxx@raw.githubusercontent.com/dp-elektronik/checklisten/main/VERSION
+UPDATE_VERSION_URL=https://<DEIN-TOKEN>@raw.githubusercontent.com/renezmn/checklisten/main/VERSION
 ```
+
+Der Token sieht aus wie `ghp_…` (klassisch) bzw. `github_pat_…` (fine-grained).
 
 ---
 
